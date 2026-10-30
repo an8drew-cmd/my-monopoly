@@ -1,0 +1,19 @@
+{
+  "name": "my-monopoly-ios",
+  "version": "1.0.0",
+  "description": "Своя 2D Монополия для iPhone (PWA + онлайн-комнаты + упаковка в .ipa через Capacitor)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "ios:init": "npx cap add ios",
+    "ios:sync": "npx cap sync ios"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2"
+  }
+}

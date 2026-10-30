@@ -1,0 +1,24 @@
+{
+  "name": "МОНОПОЛИЯ — Клуб друзей",
+  "short_name": "Монополия",
+  "description": "Своя 2D Монополия на русском для iPhone: на одном экране и онлайн по коду комнаты",
+  "lang": "ru",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

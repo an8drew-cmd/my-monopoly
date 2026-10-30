@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>МОНОПОЛИЯ — 2D Edition для iOS</title>
+
+  <!-- Настройки полноэкранного режима для iPhone (аналог Info.plist в Safari PWA) -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Монополия" />
+  <meta name="theme-color" content="#0F172A" />
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ==================== ЭКРАН 1: ГЛАВНОЕ МЕНЮ ==================== -->
+    <section id="screen-menu" class="screen active">
+      <div class="menu-container">
+        <header class="hero-header">
+          <div class="hero-badge">iOS · PWA · 2D EDITION</div>
+          <h1 id="menu-title">МОНОПОЛИЯ</h1>
+          <p id="menu-subtitle" class="hero-sub">Клуб друзей · Играйте на одном экране или со своих iPhone</p>
+        </header>
+
+        <div class="mode-tabs">
+          <button class="mode-tab active" data-tab="local">📱 На одном экране</button>
+          <button class="mode-tab" data-tab="online">🌐 Онлайн по коду</button>
+          <button class="mode-tab" data-tab="custom">✏️ Свои правила</button>
+        </div>
+
+        <!-- Вкладка 1: Локальная игра + Боты -->
+        <div id="tab-local" class="tab-panel active">
+          <div class="card-box">
+            <div class="box-header">
+              <h2>Участники партии</h2>
+              <button id="btn-add-local-player" class="btn btn-sm btn-outline">+ Игрок</button>
+            </div>
+            <p class="hint-text">Передавайте телефон по очереди или включите умных ботов 🤖 для тренировки:</p>
+            <div id="local-players-list" class="setup-players-list"></div>
+            <button id="btn-start-local" class="btn btn-primary btn-lg btn-block">🎲 Начать игру</button>
+          </div>
+        </div>
+
+        <!-- Вкладка 2: Онлайн по коду комнаты -->
+        <div id="tab-online" class="tab-panel">
+          <div class="card-box" id="online-entry-box">
+            <h2>Игра с друзьями со своих iPhone</h2>
+            <p class="hint-text">Один создаёт комнату и отправляет друзьям код из 4 символов в Telegram или WhatsApp.</p>
+
+            <div class="form-row">
+              <label>Ваше имя</label>
+              <input type="text" id="online-name" maxlength="16" placeholder="Например, Алекс" value="Игрок 1" />
+            </div>
+
+            <div class="form-row">
+              <label>Ваша фишка</label>
+              <div id="online-token-picker" class="token-picker"></div>
+            </div>
+
+            <div class="online-actions-grid">
+              <button id="btn-create-room" class="btn btn-primary btn-lg">✨ Создать комнату</button>
+              <div class="join-group">
+                <input type="text" id="online-room-code-input" maxlength="5" placeholder="КОД" class="code-input" />
+                <button id="btn-join-room" class="btn btn-accent">Войти</button>
+              </div>
+            </div>
+            <div id="online-status-msg" class="status-note"></div>
+          </div>
+
+          <!-- Лобби созданной онлайн-комнаты -->
+          <div class="card-box hidden" id="online-lobby-box">
+            <div class="lobby-code-banner">
+              <div>
+                <span class="small-label">КОД КОМНАТЫ ДЛЯ ДРУЗЕЙ</span>
+                <div id="lobby-room-code" class="big-room-code">----</div>
+              </div>
+              <button id="btn-copy-invite" class="btn btn-sm btn-outline">📋 Скопировать ссылку</button>
+            </div>
+
+            <h3>Игроки в комнате:</h3>
+            <div id="lobby-players-list" class="lobby-list"></div>
+
+            <div id="lobby-host-controls" class="lobby-controls">
+              <button id="btn-lobby-add-bot" class="btn btn-sm btn-outline">+ Добавить бота 🤖</button>
+              <button id="btn-lobby-start" class="btn btn-primary btn-lg btn-block">🚀 Запустить партию для всех</button>
+            </div>
+            <p id="lobby-guest-wait" class="hint-text hidden">Ожидаем, пока создатель комнаты запустит игру…</p>
+            <button id="btn-leave-lobby" class="btn btn-sm btn-ghost btn-block">Выйти из комнаты</button>
+          </div>
+        </div>
+
+        <!-- Вкладка 3: Конструктор своих правил и названий -->
+        <div id="tab-custom" class="tab-panel">
+          <div class="card-box">
+            <div class="box-header">
+              <h2>Конструктор своей версии</h2>
+              <button id="btn-reset-config" class="btn btn-sm btn-ghost">Сбросить к классике</button>
+            </div>
+            <p class="hint-text">Переименуй улицы под свой город или компанию друзей! Изменения сохраняются в памяти телефона и автоматически передаются друзьям в онлайн-комнате.</p>
+
+            <div class="custom-grid-2">
+              <div class="form-row">
+                <label>Название игры</label>
+                <input type="text" id="cfg-title" maxlength="24" />
+              </div>
+              <div class="form-row">
+                <label>Знак валюты</label>
+                <input type="text" id="cfg-currency" maxlength="4" />
+              </div>
+              <div class="form-row">
+                <label>Стартовый капитал</label>
+                <input type="number" id="cfg-start-cash" step="500" min="1000" />
+              </div>
+              <div class="form-row">
+                <label>Награда за «СТАРТ»</label>
+                <input type="number" id="cfg-go-salary" step="100" min="100" />
+              </div>
+            </div>
+
+            <label class="checkbox-row">
+              <input type="checkbox" id="cfg-parking-jackpot" />
+              <span>Копить все налоги в джекпот на клетке «Бесплатная парковка»</span>
+            </label>
+
+            <h3 class="sub-heading">Улицы и клетки поля (нажми, чтобы переименовать):</h3>
+            <div id="cfg-tiles-editor" class="cfg-tiles-list"></div>
+
+            <div class="custom-btn-row">
+              <button id="btn-save-config" class="btn btn-primary">💾 Сохранить изменения</button>
+              <button id="btn-export-config" class="btn btn-outline">📥 Скачать файл boardConfig.js</button>
+            </div>
+          </div>
+        </div>
+
+        <footer class="menu-footer">
+          <button id="btn-ios-guide" class="btn btn-sm btn-outline">📲 Как поставить иконку на iPhone и собрать .ipa</button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ==================== ЭКРАН 2: ИГРОВОЕ ПОЛЕ 2D ==================== -->
+    <section id="screen-game" class="screen">
+      <!-- Верхняя панель управления -->
+      <header class="game-topbar">
+        <div class="topbar-left">
+          <button id="btn-exit-game" class="icon-btn" title="В меню">🏠</button>
+          <div class="turn-pill">
+            <span id="hud-mode-badge" class="badge-mini">ЛОКАЛЬНО</span>
+            <span id="hud-turn-info">Раунд 1</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button id="btn-open-trade" class="top-action-btn">🤝 Обмен</button>
+          <button id="btn-toggle-zoom" class="icon-btn" title="Масштаб доски">🔍</button>
+          <button id="btn-open-log" class="icon-btn" title="Журнал ходов">📜</button>
+          <button id="btn-toggle-sound" class="icon-btn" title="Звук">🔊</button>
+        </div>
+      </header>
+
+      <!-- Основная рабочая область: 2D доска + Панель игроков -->
+      <main class="game-layout">
+        <div class="board-stage" id="board-stage">
+          <div id="board-grid" class="board-grid">
+            <!-- 40 клеток создаются автоматически в app.js + Центральный стол -->
+            <div class="board-center">
+              <div class="center-brand">
+                <div class="center-logo" id="board-center-title">МОНОПОЛИЯ</div>
+                <div class="center-pot hidden" id="board-parking-pot">🅿️ Банк парковки: 0 ₽</div>
+              </div>
+
+              <!-- 2D Кубики -->
+              <div class="dice-arena" id="dice-arena">
+                <div class="die" id="die-1" data-val="1"></div>
+                <div class="die" id="die-2" data-val="1"></div>
+              </div>
+
+              <!-- Статус текущего хода и главные кнопки действия -->
+              <div class="center-turn-box">
+                <div id="active-player-banner" class="active-player-banner">Ход игрока</div>
+                <div id="turn-controls" class="turn-controls"></div>
+              </div>
+
+              <!-- Последнее событие -->
+              <div id="center-last-log" class="center-last-log">Нажмите «Бросить кубики», чтобы начать ход</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Боковая / нижняя панель игроков и быстрых эмоций -->
+        <aside class="sidebar-panel">
+          <div id="players-strip" class="players-strip"></div>
+
+          <!-- Быстрые реакции для онлайн-игры -->
+          <div id="quick-chat-bar" class="quick-chat-bar hidden">
+            <button class="chat-chip" data-msg="🎲 Кидай скорее!">🎲 Скорее!</button>
+            <button class="chat-chip" data-msg="🤝 Давай меняться!">🤝 Обмен?</button>
+            <button class="chat-chip" data-msg="💸 Готовь ренту!">💸 Плати!</button>
+            <button class="chat-chip" data-msg="😂 Повезло!">😂 Ха-ха!</button>
+          </div>
+        </aside>
+      </main>
+    </section>
+
+    <!-- ==================== МОДАЛЬНЫЕ ОКНА ==================== -->
+
+    <!-- 1. Карточка участка (Титул собственности) -->
+    <div id="modal-tile" class="modal-backdrop hidden">
+      <div class="modal-card deed-modal">
+        <div id="deed-header" class="deed-header">
+          <span class="deed-kicker">ТИТУЛ СОБСТВЕННОСТИ</span>
+          <h3 id="deed-title">Улица</h3>
+        </div>
+        <div id="deed-body" class="deed-body"></div>
+        <div id="deed-actions" class="deed-actions"></div>
+        <button class="btn btn-ghost btn-block modal-close-btn" data-close="modal-tile">Закрыть</button>
+      </div>
+    </div>
+
+    <!-- 2. Карточка Шанс / Казна -->
+    <div id="modal-card-drawn" class="modal-backdrop hidden">
+      <div class="modal-card chance-modal">
+        <div id="drawn-card-badge" class="chance-badge">ШАНС</div>
+        <p id="drawn-card-text" class="chance-text"></p>
+        <button class="btn btn-primary btn-block modal-close-btn" data-close="modal-card-drawn">Понятно</button>
+      </div>
+    </div>
+
+    <!-- 3. Окно Аукциона -->
+    <div id="modal-auction" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="auction-kicker">🔨 ОТКРЫТЫЙ АУКЦИОН</div>
+        <h3 id="auc-tile-name">Улица</h3>
+        <div class="auc-price-box">
+          <span>Текущая ставка:</span>
+          <strong id="auc-current-bid">500 ₽</strong>
+          <small id="auc-leader">Ставок пока нет</small>
+        </div>
+        <div id="auc-turn-prompt" class="auc-turn-prompt">Очередь игрока</div>
+        <div id="auc-buttons" class="auc-buttons">
+          <button class="btn btn-primary" data-bid="50">+50</button>
+          <button class="btn btn-primary" data-bid="100">+100</button>
+          <button class="btn btn-primary" data-bid="250">+250</button>
+          <button class="btn btn-outline" id="btn-auc-pass">Пас</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Окно создания сделки (Обмен) -->
+    <div id="modal-trade" class="modal-backdrop hidden">
+      <div class="modal-card modal-wide">
+        <h3>🤝 Предложить обмен</h3>
+        <div class="form-row">
+          <label>С кем меняемся:</label>
+          <select id="trade-partner-select"></select>
+        </div>
+        <div class="trade-columns">
+          <div class="trade-col">
+            <h4 id="trade-my-title">Вы отдаёте</h4>
+            <label class="small-label">Доплата деньгами:</label>
+            <input type="number" id="trade-offer-cash" min="0" step="100" value="0" />
+            <div id="trade-my-tiles" class="trade-tiles-checklist"></div>
+          </div>
+          <div class="trade-col">
+            <h4 id="trade-their-title">Вы получаете</h4>
+            <label class="small-label">Запросить денег:</label>
+            <input type="number" id="trade-request-cash" min="0" step="100" value="0" />
+            <div id="trade-their-tiles" class="trade-tiles-checklist"></div>
+          </div>
+        </div>
+        <div class="modal-btn-row">
+          <button id="btn-send-trade" class="btn btn-primary">Отправить предложение</button>
+          <button class="btn btn-ghost modal-close-btn" data-close="modal-trade">Отмена</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Входящее предложение сделки -->
+    <div id="modal-trade-incoming" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <h3>💼 Предложение сделки!</h3>
+        <div id="incoming-trade-summary" class="trade-summary-box"></div>
+        <div id="incoming-trade-buttons" class="modal-btn-row">
+          <button id="btn-accept-trade" class="btn btn-primary">✅ Принять</button>
+          <button id="btn-decline-trade" class="btn btn-danger">❌ Отклонить</button>
+        </div>
+        <div id="incoming-trade-waiting" class="hint-text hidden">Ожидаем ответа второго игрока… <button id="btn-cancel-trade" class="btn btn-sm btn-ghost">Отменить</button></div>
+      </div>
+    </div>
+
+    <!-- 6. Журнал событий -->
+    <div id="modal-log" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <h3>📜 Журнал партии</h3>
+        <div id="full-log-list" class="full-log-list"></div>
+        <button class="btn btn-ghost btn-block modal-close-btn" data-close="modal-log">Закрыть</button>
+      </div>
+    </div>
+
+    <!-- 7. Памятка по установке на iPhone и устройству .ipa -->
+    <div id="modal-ios-guide" class="modal-backdrop hidden">
+      <div class="modal-card modal-wide">
+        <h3>📲 Запуск на iPhone и устройство сборки</h3>
+        <div class="guide-steps">
+          <div class="guide-block">
+            <h4>Способ 1 (за 10 секунд для себя и друзей — без проводов):</h4>
+            <ol>
+              <li>Открой ссылку на игру в браузере <strong>Safari</strong> на iPhone.</li>
+              <li>Нажми внизу кнопку <strong>«Поделиться»</strong> (квадрат со стрелкой вверх ⬆️).</li>
+              <li>Выбери <strong>«На экран „Домой“» → «Добавить»</strong>.</li>
+              <li>Готово! На рабочем столе iPhone появится иконка <strong>Монополия</strong>, и игра будет открываться во весь экран без адресной строки — как из App Store!</li>
+            </ol>
+          </div>
+          <div class="guide-block">
+            <h4>Способ 2 (собрать настоящий архив <code>.ipa</code> с Windows):</h4>
+            <p>В проект уже встроены настройки <strong>Capacitor</strong> (<code>capacitor.config.json</code>) и готовый сценарий облачной сборки на сервере Mac (<code>.github/workflows/build-ios-ipa.yml</code>). Загрузив папку на бесплатный GitHub, облако само запустит Xcode и отдаст тебе готовый <code>Monopoly.ipa</code> с папкой <code>Payload/App.app</code> и <code>Info.plist</code>!</p>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block modal-close-btn" data-close="modal-ios-guide">Отлично, всё понятно!</button>
+      </div>
+    </div>
+
+    <!-- 8. Победа -->
+    <div id="modal-winner" class="modal-backdrop hidden">
+      <div class="modal-card winner-modal">
+        <div class="winner-trophy">🏆</div>
+        <h2 id="winner-title">Победа!</h2>
+        <p id="winner-subtitle">Все конкуренты обанкротились!</p>
+        <button id="btn-winner-menu" class="btn btn-primary btn-lg btn-block">Вернуться в меню</button>
+      </div>
+    </div>
+
+    <!-- Всплывающее уведомление (тост) -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script src="./js/boardConfig.js"></script>
+  <script src="./js/gameEngine.js"></script>
+  <script src="./js/sound.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

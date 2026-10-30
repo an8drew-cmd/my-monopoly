@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: my-monopoly-ios
+    runtime: node
+    plan: free
+    buildCommand: echo "No build step needed"
+    startCommand: node server.js
